@@ -32,3 +32,32 @@ func TestPackage(t *testing.T) {
 		t.Error("unexpected data")
 	}
 }
+
+func MockPackage() ([][]string, error) {
+	return [][]string{
+		{"0", "1", "2"},
+		{"0", "1", "1"},
+		{},
+		{"0", "1", "2", "3"},
+	}, nil
+}
+
+func TestSummerize(t *testing.T) {
+	s := Stats{}
+	err := s.NewSum(MockPackage)
+	if err != nil {
+		t.Error(err)
+	}
+	if s.Max() != 6 {
+		t.Error("unexpected max")
+	}
+	if s.Sum(0) != 3 {
+		t.Error("unexpected sum")
+	}
+	if s.Sum(1) != 2 {
+		t.Error("unexpected sum")
+	}
+	if s.Sum(s.ID()) != 6 {
+		t.Error("unexpected sum")
+	}
+}
