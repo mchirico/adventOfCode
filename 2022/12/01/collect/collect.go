@@ -3,7 +3,6 @@ package collect
 import (
 	"aoc20221201/data"
 	"strconv"
-	"strings"
 )
 
 type Summer struct {
@@ -59,29 +58,43 @@ func (s *Stats) NewSum(f func() ([][]string, error)) error {
 
 }
 
-func Read() ([]string, error) {
-	raw, err := data.Read(data.Path("./input0"))
-	if err != nil {
-		return nil, err
-	}
-	return strings.Split(string(raw), "\n"), nil
+func Read() ([]byte, error) {
+	return data.Read(data.Path("./input0"))
 }
 
-func Package() ([][]string, error) {
-	out := [][]string{}
-	data, err := Read()
-	if err != nil {
-		return nil, err
+type Packer struct {
+	Read   func() ([]byte, error)
+	ops    []string
+	sep    string // separator
+	Modify func([]byte, ...string) ([]string, error)
+	sdata  [][]string
+}
+
+func (p *Packer) Data() [][]string {
+	return p.sdata
+}
+
+func (p *Packer) Package() error {
+	if p.sdata == nil {
+		p.sdata = [][]string{}
 	}
-	sub := []string{}
-	for _, line := range data {
-		if line == "" {
-			out = append(out, sub)
+	d, err := p.Read()
+	if err != nil {
+		return err
+	}
+	list, err := p.Modify(d, p.ops...)
+	if err != nil {
+		return err
+	}
+	var sub []string
+	for _, line := range list {
+		if line == p.sep {
+			p.sdata = append(p.sdata, sub)
 			sub = []string{}
 		} else {
 			sub = append(sub, line)
 		}
 	}
-	out = append(out, sub)
-	return out, nil
+	p.sdata = append(p.sdata, sub)
+	return nil
 }

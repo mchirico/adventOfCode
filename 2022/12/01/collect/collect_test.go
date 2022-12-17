@@ -1,14 +1,16 @@
 package collect
 
 import (
+	"strings"
 	"testing"
 )
 
 func TestRead(t *testing.T) {
-	data, err := Read()
+	b, err := Read()
 	if err != nil {
 		t.Error(err)
 	}
+	data := strings.Split(string(b), "\n")
 	count := 0
 	blanks := 0
 	for _, v := range data {
@@ -23,12 +25,29 @@ func TestRead(t *testing.T) {
 
 }
 
+func mockRead() ([]byte, error) {
+	return []byte(`0
+1
+2
+
+1`), nil
+}
+
+func mockModify(b []byte, ops ...string) ([]string, error) {
+	return strings.Split(string(b), ops[0]), nil
+}
+
 func TestPackage(t *testing.T) {
-	data, err := Package()
+	p := &Packer{Read: mockRead,
+		Modify: mockModify,
+		sep:    "",
+		ops:    []string{"\n"},
+	}
+	err := p.Package()
 	if err != nil {
 		t.Error(err)
 	}
-	if len(data) != 248 {
+	if len(p.Data()) != 2 {
 		t.Error("unexpected data")
 	}
 }

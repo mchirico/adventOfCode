@@ -26,6 +26,6 @@ func Path(rel string) string {
 }
 
 func Read(file string) ([]byte, error) {
-	dat, err := os.ReadFile(file)
-	return dat, err
+	return os.ReadFile(file)
+
 }
